@@ -11,6 +11,22 @@ int main()
 
   for (int y = 0; y < image_height; y++)
   {
+    int scanlines = image_height;
+    int done = y;
+    int progress = done * 100 / scanlines;
+    std::clog << '\r';
+    for (int i = 0; i < 100; i++)
+    {
+      if (i <= progress)
+      {
+        std::clog << 'X';
+      }
+      else
+      {
+        std::clog << '-';
+      }
+    }
+    std::clog << ' ' << std::flush;
     for (int x = 0; x < image_width; x++)
     {
       auto r = double(x) / (image_width - 1);
