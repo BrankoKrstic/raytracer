@@ -51,7 +51,7 @@ inline std::ostream &operator<<(std::ostream &out, const vec3 &v)
 {
   return out << v[0] << ' ' << v[1] << ' ' << v[2];
 }
-inline vec3 operator+(const vec3 &u, const vec3 &v)
+inline vec3 operator+(const vec3 &v, const vec3 &u)
 {
   return vec3(v[0] + u[0], v[1] + u[1], v[2] + u[2]);
 }
