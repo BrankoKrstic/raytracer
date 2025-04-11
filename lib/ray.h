@@ -1,5 +1,5 @@
-#ifndef RAY_H;
-#define RAY_H ;
+#ifndef RAY_H
+#define RAY_H
 
 #include "vec3.h"
 
@@ -12,7 +12,7 @@ public:
   {
     return orig;
   }
-  const vec3 &direction()
+  const vec3 &direction() const
   {
     return dir;
   }
