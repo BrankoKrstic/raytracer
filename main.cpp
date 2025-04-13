@@ -41,7 +41,7 @@ void print_progress(int progress_percent)
 color ray_color(const ray &r, const hittable_list &world)
 {
   hit_record rec;
-  if (world.hit(r, 0, POSITIVE_INFINITY, rec))
+  if (world.hit(r, interval(0, POSITIVE_INFINITY), rec))
   {
     return 0.5 * (rec.normal + vec3(1, 1, 1));
   }

@@ -23,7 +23,7 @@ class hittable
 {
 public:
   virtual ~hittable() = default;
-  virtual bool hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &rec) const = 0;
+  virtual bool hit(const ray &r, interval ray_t, hit_record &rec) const = 0;
 };
 
 using std::make_shared;
@@ -43,15 +43,15 @@ public:
   {
     objects.push_back(object);
   }
-  bool hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &rec) const override
+  bool hit(const ray &r, interval ray_t, hit_record &rec) const override
   {
     hit_record temp;
     bool hit_anything = false;
-    auto closest_so_far = ray_tmax;
+    auto closest_so_far = ray_t.max;
 
     for (const auto &object : objects)
     {
-      if (object->hit(r, ray_tmin, ray_tmax, temp))
+      if (object->hit(r, ray_t, temp))
       {
         hit_anything = true;
         // TODO: fill in this logic

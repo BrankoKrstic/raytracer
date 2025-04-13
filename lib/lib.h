@@ -14,6 +14,8 @@ using std::shared_ptr;
 // Constants
 
 constexpr double POSITIVE_INFINITY = std::numeric_limits<double>::infinity();
+constexpr double NEGATIVE_INFINITY = -POSITIVE_INFINITY;
+
 constexpr double PI = 3.1415926535897932385;
 
 // Utility Functions
@@ -28,5 +30,6 @@ constexpr inline double degrees_to_radians(double degrees)
 #include "color.h"
 #include "ray.h"
 #include "vec3.h"
+#include "interval.h"
 
 #endif
