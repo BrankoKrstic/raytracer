@@ -8,7 +8,7 @@ class ray
 public:
   ray() {}
   ray(const vec3 &origin, const vec3 &direction) : orig(origin), dir(direction) {}
-  const vec3 &origin()
+  const vec3 &origin() const
   {
     return orig;
   }
@@ -16,7 +16,7 @@ public:
   {
     return dir;
   }
-  const vec3 &at(double t) const
+  vec3 at(double t) const
   {
     return orig + dir * t;
   }
