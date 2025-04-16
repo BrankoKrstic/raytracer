@@ -52,7 +52,8 @@
     "xtr1common": "cpp",
     "xutility": "cpp",
     "thread": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "random": "cpp"
   },
   
 }

@@ -7,6 +7,7 @@
 
 constexpr static double focal_length = 2.0;
 constexpr static vec3 camera_center = vec3(0, 0, 0);
+constexpr static int samples_per_pixel = 10;
 
 void print_progress(int progress_percent)
 {
@@ -41,14 +42,26 @@ public:
       print_progress(y * 100 / image_height);
       for (int x = 0; x < image_width; x++)
       {
-        auto pixel_center = pixel100_loc + (x * pixel_delta_u) + (y * pixel_delta_v);
-        auto ray_direction = pixel_center - camera_center;
-        auto r = ray(camera_center, ray_direction);
-
-        color pixel_color = ray_color(r, world);
-        write_color(std::cout, pixel_color);
+        color pixel_color(0, 0, 0);
+        for (int sample = 0; sample < samples_per_pixel; sample++)
+        {
+          ray r = get_ray(y, x);
+          pixel_color += ray_color(r, world);
+        }
+        write_color(std::cout, pixel_color * pixel_samples_scale);
       }
     }
+  }
+  ray get_ray(int y, int x)
+  {
+    auto offset = sample_square();
+    auto pixel_sample = pixel100_loc + ((x + offset.x()) * pixel_delta_u) + ((y + offset.y()) * pixel_delta_v);
+    auto ray_direction = pixel_sample - camera_center;
+    return ray(camera_center, ray_direction);
+  }
+  vec3 sample_square() const
+  {
+    return vec3(random_double() - 0.5, random_double() - 0.5, 0);
   }
 
 private:
@@ -60,6 +73,7 @@ private:
   double viewport_height = 2.0;
   int image_height;
   double viewport_width;
+  double pixel_samples_scale;
 
   void init()
   {
@@ -73,6 +87,8 @@ private:
 
     auto viewport_upper_left = camera_center - vec3(0, 0, focal_length) - viewport_v / 2 - viewport_u / 2;
     pixel100_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+    pixel_samples_scale = 1.0 / samples_per_pixel;
   }
   color ray_color(const ray &r, const hittable &world)
   {
