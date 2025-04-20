@@ -91,4 +91,12 @@ inline vec3 unit_vector(const vec3 &v)
 {
   return v / v.length();
 }
+
+inline vec3 random_in_unit_disk()
+{
+  auto y = random_double(-1, 1);
+  auto max_x = std::sqrt(1 - (y * y));
+  auto x = random_double(-max_x, max_x);
+  return vec3(x, y, 0.0);
+}
 #endif

@@ -54,7 +54,7 @@ public:
   }
   ray get_ray(int y, int x)
   {
-    auto offset = sample_square();
+    auto offset = sample_disk();
     auto pixel_sample = pixel100_loc + ((x + offset.x()) * pixel_delta_u) + ((y + offset.y()) * pixel_delta_v);
     auto ray_direction = pixel_sample - camera_center;
     return ray(camera_center, ray_direction);
@@ -62,6 +62,10 @@ public:
   vec3 sample_square() const
   {
     return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+  }
+  vec3 sample_disk() const
+  {
+    return random_in_unit_disk();
   }
 
 private:
