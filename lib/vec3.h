@@ -92,11 +92,45 @@ inline vec3 unit_vector(const vec3 &v)
   return v / v.length();
 }
 
+inline vec3 random()
+{
+  return vec3(random_double(), random_double(), random_double());
+}
+
+inline vec3 random(double min, double max)
+{
+  return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+}
+
+inline vec3 random_unit_vector()
+{
+  // random vector uniformly distributed on unit sphere surface https://mathworld.wolfram.com/SpherePointPicking.html
+  auto theta = random_double(0, 2 * PI);
+  auto phi = std::acos(random_double(-1, 1));
+  auto sinPhi = std::sin(phi);
+  auto cosPhi = std::cos(phi);
+  auto sinTheta = std::sin(theta);
+  auto cosTheta = std::cos(theta);
+
+  return vec3(sinPhi * cosTheta, sinPhi * sinTheta, cosPhi);
+}
 inline vec3 random_in_unit_disk()
 {
   auto y = random_double(-1, 1);
   auto max_x = std::sqrt(1 - (y * y));
   auto x = random_double(-max_x, max_x);
   return vec3(x, y, 0.0);
+}
+inline vec3 random_on_hemisphere(const vec3 &normal)
+{
+  vec3 on_unit_sphere = random_unit_vector();
+  if (dot(on_unit_sphere, normal) > 0.0)
+  {
+    return on_unit_sphere;
+  }
+  else
+  {
+    return -on_unit_sphere;
+  }
 }
 #endif
