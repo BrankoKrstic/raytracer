@@ -5,9 +5,10 @@
 #include "color.h"
 #include "interval.h"
 
-constexpr static double focal_length = 2.0;
+constexpr static double focal_length = 1.0;
 constexpr static vec3 camera_center = vec3(0, 0, 0);
-constexpr static int samples_per_pixel = 10;
+constexpr static int samples_per_pixel = 100;
+constexpr int max_depth = 10; // Maximum number of ray bounces into scene
 
 void print_progress(int progress_percent)
 {
@@ -45,8 +46,17 @@ public:
         color pixel_color(0, 0, 0);
         for (int sample = 0; sample < samples_per_pixel; sample++)
         {
-          ray r = get_ray(y, x);
-          pixel_color += ray_color(r, world);
+          try
+          {
+            ray r = get_ray(y, x);
+            // Block of code to try
+            pixel_color += ray_color(r, max_depth, world);
+          }
+          catch (...)
+          {
+            std::cout << "EXCEPTION\n";
+            // Block of code to handle errors
+          }
         }
         write_color(std::cout, pixel_color * pixel_samples_scale);
       }
@@ -72,7 +82,7 @@ private:
   vec3 pixel100_loc;
   vec3 pixel_delta_u;
   vec3 pixel_delta_v;
-  int image_width = 1000;
+  int image_width = 500;
   double ratio = 16.0 / 9.0;
   double viewport_height = 2.0;
   int image_height;
@@ -94,12 +104,17 @@ private:
 
     pixel_samples_scale = 1.0 / samples_per_pixel;
   }
-  color ray_color(const ray &r, const hittable &world)
+  color ray_color(const ray &r, int depth, const hittable &world)
   {
-    hit_record rec;
-    if (world.hit(r, interval(0, POSITIVE_INFINITY), rec))
+    if (depth <= 0)
     {
-      return 0.5 * (rec.normal + vec3(1, 1, 1));
+      return vec3(0, 0, 0);
+    }
+    hit_record rec;
+    if (world.hit(r, interval(0.001, POSITIVE_INFINITY), rec))
+    {
+      vec3 direction = rec.normal + random_unit_vector();
+      return 0.5 * ray_color(ray(rec.point, direction), depth - 1, world);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
