@@ -6,8 +6,12 @@
 #include "interval.h"
 #include "material.h"
 
-constexpr static double focal_length = 1.0;
-constexpr static vec3 camera_center = vec3(0, 0, 0);
+constexpr static double fov_vertical = 90.0;
+
+constexpr static vec3 lookfrom = vec3(0, 0, 0);
+constexpr static vec3 lookat = vec3(0, 0, -1);
+constexpr static vec3 vup = vec3(0, 1, 0);
+
 constexpr static int samples_per_pixel = 100;
 constexpr int max_depth = 10; // Maximum number of ray bounces into scene
 
@@ -47,17 +51,9 @@ public:
         color pixel_color(0, 0, 0);
         for (int sample = 0; sample < samples_per_pixel; sample++)
         {
-          try
-          {
-            ray r = get_ray(y, x);
-            // Block of code to try
-            pixel_color += ray_color(r, max_depth, world);
-          }
-          catch (...)
-          {
-            std::cout << "EXCEPTION\n";
-            // Block of code to handle errors
-          }
+          ray r = get_ray(y, x);
+          // Block of code to try
+          pixel_color += ray_color(r, max_depth, world);
         }
         write_color(std::cout, pixel_color * pixel_samples_scale);
       }
@@ -67,8 +63,8 @@ public:
   {
     auto offset = sample_disk();
     auto pixel_sample = pixel100_loc + ((x + offset.x()) * pixel_delta_u) + ((y + offset.y()) * pixel_delta_v);
-    auto ray_direction = pixel_sample - camera_center;
-    return ray(camera_center, ray_direction);
+    auto ray_direction = pixel_sample - center;
+    return ray(center, ray_direction);
   }
   vec3 sample_square() const
   {
@@ -83,27 +79,36 @@ private:
   vec3 pixel100_loc;
   vec3 pixel_delta_u;
   vec3 pixel_delta_v;
+  vec3 u, v, w;
   int image_width = 500;
   double ratio = 16.0 / 9.0;
-  double viewport_height = 2.0;
+  vec3 center;
   int image_height;
   double viewport_width;
   double pixel_samples_scale;
 
   void init()
   {
+    auto focal_length = (lookfrom - lookat).length();
     image_height = int(image_width / ratio);
+    auto theta = degrees_to_radians(fov_vertical);
+    auto h = std::tan(theta / 2);
+    auto viewport_height = 2 * h * focal_length;
     viewport_width = viewport_height * (double(image_width) / image_height);
-    auto viewport_u = vec3(viewport_width, 0, 0);
-    auto viewport_v = vec3(0, -viewport_height, 0);
 
+    w = unit_vector(lookfrom - lookat);
+    u = unit_vector(cross(vup, w));
+    v = cross(w, u);
+
+    auto viewport_u = viewport_width * u;
+    auto viewport_v = -viewport_height * v;
+    pixel_samples_scale = 1.0 / samples_per_pixel;
+    center = lookfrom;
     pixel_delta_u = viewport_u / image_width;
     pixel_delta_v = viewport_v / image_height;
 
-    auto viewport_upper_left = camera_center - vec3(0, 0, focal_length) - viewport_v / 2 - viewport_u / 2;
+    auto viewport_upper_left = center - focal_length * w - viewport_v / 2 - viewport_u / 2;
     pixel100_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-
-    pixel_samples_scale = 1.0 / samples_per_pixel;
   }
   color ray_color(const ray &r, int depth, const hittable &world)
   {

@@ -54,10 +54,9 @@ public:
 
     for (const auto &object : objects)
     {
-      if (object->hit(r, ray_t, temp))
+      if (object->hit(r, interval(ray_t.min, closest_so_far), temp))
       {
         hit_anything = true;
-        // TODO: fill in this logic
         closest_so_far = temp.t;
         rec = temp;
       }
