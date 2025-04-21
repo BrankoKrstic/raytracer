@@ -4,11 +4,17 @@
 #include <vector>
 #include "ray.h"
 
+using std::make_shared;
+using std::shared_ptr;
+
+class material;
+
 class hit_record
 {
 public:
   vec3 point;
   vec3 normal;
+  shared_ptr<material> mat;
   double t;
   bool front_face;
 
@@ -25,9 +31,6 @@ public:
   virtual ~hittable() = default;
   virtual bool hit(const ray &r, interval ray_t, hit_record &rec) const = 0;
 };
-
-using std::make_shared;
-using std::shared_ptr;
 
 class hittable_list : public hittable
 {

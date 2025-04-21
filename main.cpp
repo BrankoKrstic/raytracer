@@ -2,17 +2,21 @@
 #include "lib.h"
 #include "sphere.h"
 #include "camera.h"
+#include "material.h"
 
 int main()
 {
   camera cam;
   hittable_list world;
-  world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100));
-  world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
-  // world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
-  // world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100));
-  // world.add(make_shared<sphere>(vec3(-1, -1, -3), 0.5));
-  // world.add(make_shared<sphere>(vec3(2, 0, -3), 0.7));
+  auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+  auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+  auto material_left = make_shared<metal>(color(0.8, 0.8, 0.8), 0.1);
+  auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 0.5);
+
+  world.add(make_shared<sphere>(vec3(0.0, -100.5, -1.0), 100.0, material_ground));
+  world.add(make_shared<sphere>(vec3(0.0, 0.0, -1.2), 0.5, material_center));
+  world.add(make_shared<sphere>(vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+  world.add(make_shared<sphere>(vec3(1.0, 0.0, -1.0), 0.5, material_right));
 
   cam.render(world);
 }

@@ -4,6 +4,7 @@
 #include "hit.h"
 #include "color.h"
 #include "interval.h"
+#include "material.h"
 
 constexpr static double focal_length = 1.0;
 constexpr static vec3 camera_center = vec3(0, 0, 0);
@@ -108,13 +109,18 @@ private:
   {
     if (depth <= 0)
     {
-      return vec3(0, 0, 0);
+      return color(0, 0, 0);
     }
     hit_record rec;
     if (world.hit(r, interval(0.001, POSITIVE_INFINITY), rec))
     {
-      vec3 direction = rec.normal + random_unit_vector();
-      return 0.5 * ray_color(ray(rec.point, direction), depth - 1, world);
+      ray scattered;
+      color attenuation;
+      if (rec.mat->scatter(r, rec, attenuation, scattered))
+      {
+        return attenuation * ray_color(scattered, depth - 1, world);
+      }
+      return color(0, 0, 0);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
