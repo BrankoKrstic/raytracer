@@ -6,11 +6,15 @@
 #include "interval.h"
 #include "material.h"
 
-constexpr static double fov_vertical = 90.0;
+constexpr static double fov_vertical = 20.0;
 
-constexpr static vec3 lookfrom = vec3(0, 0, 0);
+constexpr static vec3 lookfrom = vec3(-2, 2, 1);
+;
 constexpr static vec3 lookat = vec3(0, 0, -1);
 constexpr static vec3 vup = vec3(0, 1, 0);
+
+constexpr static double defocus_angle = 10.0;
+constexpr static double focus_dist = 3.4;
 
 constexpr static int samples_per_pixel = 100;
 constexpr int max_depth = 10; // Maximum number of ray bounces into scene
@@ -63,8 +67,9 @@ public:
   {
     auto offset = sample_disk();
     auto pixel_sample = pixel100_loc + ((x + offset.x()) * pixel_delta_u) + ((y + offset.y()) * pixel_delta_v);
-    auto ray_direction = pixel_sample - center;
-    return ray(center, ray_direction);
+    auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
+    auto ray_direction = pixel_sample - ray_origin;
+    return ray(ray_origin, ray_direction);
   }
   vec3 sample_square() const
   {
@@ -74,8 +79,14 @@ public:
   {
     return random_in_unit_disk();
   }
+  vec3 defocus_disk_sample()
+  {
+    auto p = random_in_unit_disk();
+    return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
+  };
 
 private:
+  int image_height;
   vec3 pixel100_loc;
   vec3 pixel_delta_u;
   vec3 pixel_delta_v;
@@ -83,17 +94,17 @@ private:
   int image_width = 500;
   double ratio = 16.0 / 9.0;
   vec3 center;
-  int image_height;
   double viewport_width;
   double pixel_samples_scale;
+  vec3 defocus_disk_u;
+  vec3 defocus_disk_v;
 
   void init()
   {
-    auto focal_length = (lookfrom - lookat).length();
     image_height = int(image_width / ratio);
     auto theta = degrees_to_radians(fov_vertical);
     auto h = std::tan(theta / 2);
-    auto viewport_height = 2 * h * focal_length;
+    auto viewport_height = 2 * h * focus_dist;
     viewport_width = viewport_height * (double(image_width) / image_height);
 
     w = unit_vector(lookfrom - lookat);
@@ -107,8 +118,12 @@ private:
     pixel_delta_u = viewport_u / image_width;
     pixel_delta_v = viewport_v / image_height;
 
-    auto viewport_upper_left = center - focal_length * w - viewport_v / 2 - viewport_u / 2;
+    auto viewport_upper_left = center - focus_dist * w - viewport_v / 2 - viewport_u / 2;
     pixel100_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+    auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
+    defocus_disk_u = u * defocus_radius;
+    defocus_disk_v = v * defocus_radius;
   }
   color ray_color(const ray &r, int depth, const hittable &world)
   {
