@@ -5,19 +5,20 @@
 #include "color.h"
 #include "interval.h"
 #include "material.h"
-
+#include <thread>
+#include <vector>
 constexpr static double fov_vertical = 20.0;
 
-constexpr static vec3 lookfrom = vec3(-2, 2, 1);
+constexpr static vec3 lookfrom = vec3(13, 2, 3);
 ;
-constexpr static vec3 lookat = vec3(0, 0, -1);
+constexpr static vec3 lookat = vec3(0, 0, 0);
 constexpr static vec3 vup = vec3(0, 1, 0);
 
-constexpr static double defocus_angle = 10.0;
-constexpr static double focus_dist = 3.4;
+constexpr static double defocus_angle = 0.6;
+constexpr static double focus_dist = 10.0;
 
-constexpr static int samples_per_pixel = 100;
-constexpr int max_depth = 10; // Maximum number of ray bounces into scene
+constexpr static int samples_per_pixel = 500;
+constexpr int max_depth = 50; // Maximum number of ray bounces into scene
 
 void print_progress(int progress_percent)
 {
@@ -91,7 +92,7 @@ private:
   vec3 pixel_delta_u;
   vec3 pixel_delta_v;
   vec3 u, v, w;
-  int image_width = 500;
+  int image_width = 1200;
   double ratio = 16.0 / 9.0;
   vec3 center;
   double viewport_width;
